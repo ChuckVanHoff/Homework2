@@ -1,0 +1,112 @@
+'A sub routine to find and sum all the trading volume for each unique stock
+
+Sub trading_volume_summary()
+
+'    Dim WS_Count As Integer
+'    Dim w As Integer
+
+' Set WS_Count equal to the number of worksheets in the active workbook.
+'    WS_Count = ActiveWorkbook.Worksheets.Count
+
+' Begin the loop.
+'    For w = 1 To WS_Count
+        
+'The variable storing the yearly total of trading for unique companies
+        Dim yearly_volume As Long
+
+'A variable to count through a loop
+        Dim i As Long
+        i = 2
+
+'A varible to  hold the running sum of daily volumes
+        Dim running_sum As Single
+        running_sum = 0
+
+'Variable to store the tricker name
+        Dim ticker As String
+        ticker = Cells(2, 1).Value
+
+'Track the number of unique tickers
+        Dim uniquie_tickers As Integer
+        unique_tickers = 2
+        
+'Store opening and closing prices
+        Dim opened_price As Single, closing_price As Single
+
+'Store first and last rows of each unique ticker
+        Dim first_ticker_row As Long
+        first_ticker_row = 2
+
+'Set the summary columns headers
+        Cells(1, 9).Value = "Ticker"
+        Cells(1, 10).Value = "Yearly Change"
+        Cells(1, 11).Value = "Percent Change"
+        Cells(1, 12).Value = "Yearly Volume"
+        
+'Start loop to find and sum volumes
+        While IsEmpty(Cells(i, 1).Value) = False
+    
+'If the next row has the same ticker value add its volume to the running daily sum
+            If Cells(i, 1).Value = Cells(i + 1, 1).Value Then
+                
+'If the cell is the first entry of a unique ticker, store the associated volume as opened_price
+                If i = first_ticker_row Then
+                    opened_price = Cells(i, 3).Value
+                End If
+                
+                running_sum = running_sum + Cells(i, 7).Value
+    
+'If the next row has a different ticker set running_sum to yearly_volume and copy that value to appropriate cell, then
+'put the new value of ticker on ther summary table.
+            Else
+                
+'Store the closing price
+                closing_price = Cells(i, 6).Value
+                
+'Update first_ticker_row
+                first_ticker_row = i + 1
+                
+'Add this row's volume to the running sum and place summed volume in summary column
+                running_sum = running_sum + Cells(i, 7).Value
+                Cells(unique_tickers, 12).Value = running_sum
+                
+'Apply conditional formatting
+                If running_sum > 0 Then
+                    Cells(unique_tickers, 12).Interior.Color = vbGreen
+                Else
+                    Cells(unique_tickers, 12).Interior.Color = vbRed
+                End If
+
+'Place ticker value in summary column
+                Cells(unique_tickers, 9).Value = ticker
+
+'Calculate the yearly change and print it in the associated summary column
+                Cells(unique_tickers, 10).Value = (closing_price - opened_price)
+                
+'Calculate the pearly percent change and print it to the associated summary column
+                Cells(unique_tickers, 11).Value = (closing_price - opened_price) / opened_price
+                
+'Update the ticker value
+                ticker = Cells(i + 1, 1).Value
+        
+'Increase the number of ticker rows in the totals columns
+                unique_tickers = unique_tickers + 1
+        
+'Set running sum back to 0
+                running_sum = 0
+
+
+                
+            End If
+    
+        i = i + 1
+
+        Wend
+    
+' This line displays the worksheet name in a message box.
+'        MsgBox (ActiveWorkbook.Worksheets(w).Name)
+    
+'    Next w
+
+End Sub
+
